@@ -2,9 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const assetRouter = require('./route/assets.route.js');
 require('dotenv').config()
-
+const cors =require('cors')
 const app = express();
-
+app.use(cors())
 app.use(express.json());
 
 mongoose.connect(process.env.mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })

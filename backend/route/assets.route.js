@@ -13,7 +13,7 @@ router.get('/:id', getById);
 router.put('/update/:id',upload.single(
     'imageString'
 ), updateById);
-router.delete('/delete', deleteMultiple);
+router.delete('/delete/:id', deleteMultiple);
 
 
 module.exports = router;

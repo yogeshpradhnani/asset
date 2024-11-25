@@ -14,9 +14,9 @@ const upload = multer({
         destination: './uploads/',
         filename(req, file, cb) {
             let date= new Date()
-            let d= date.toDateString()
+            let d= date.toDateString().replace(/ /g, '-').split()[0]
 
-            cb(null,d  + '-' + file.originalname);
+            cb(null,d  );
         }
     })
     

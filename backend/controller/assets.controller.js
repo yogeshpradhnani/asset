@@ -3,7 +3,10 @@ const Asset = require('../models/assets.model.js');
 const fs = require('fs');
 const moment = require('moment');
 const {ObjectId} = require('mongoose');
-const { error } = require('console');
+const User = require('../models/user.model.js');
+
+
+
 const createAsset = async (req, res) => {
     try {
         const { name, description ,assignedTo,assignedDate,submittedDate} = req.body;
@@ -16,12 +19,14 @@ const createAsset = async (req, res) => {
             name,
             description,
         });
-      
-        
+     
+  
         if (req.body.assignedTo) {
+            let username= await User.findOne
+            ({ name: assignedTo });
             let todayDate = new Date(); 
             let todayDateFormat = moment(todayDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
-            newAsset.assignedTo = req.body.assignedTo;
+            newAsset.assignedTo = username._id;
             newAsset.assignedDate = todayDateFormat;
             
         }
@@ -100,16 +105,22 @@ const updateById = async (req, res,next) => {
     try {
         const ids = req.params.id;  
         const { name, description, assignedTo, assignedDate, submittedDate} = req.body;
-        let result = await Asset.findOne({ name: name})
-        if(result){
-            return res.status(409).json({ success: false, message: 'Asset already exists' });
-        }
+        // let result = await Asset.findOne({ name: name})
+        // if(result){
+        //     return res.status(409).json({ success: false, message: 'Asset already exists',data:[] });
+        // }
         let assigned ;
+        let username
        if (req.body?.assignedTo) {
+         username= await User.findOne
+        ({ name: assignedTo });
+      
         let todayDate = new Date(); 
         let todayDateFormat = moment(todayDate, 'DD-MM-YYYY').format('YYYY-MM-DD');
          assigned = todayDateFormat;    
     }
+    
+    
 
     let submit ;
     if (req.body?.submittedDate) {
@@ -120,26 +131,27 @@ const updateById = async (req, res,next) => {
 
     if (req.body?.assignedDate) {
         return res.status(406)
-        .json({success: false, message: "Use can't change assignment date"})   
+        .json({success: false, message: "Use can't change assignment date",data:[]})   
     }
     let image;
     if (req.file) {
-   image=req.file.path
+   image=req.file
             
     }
 
-        const asset = await Asset.findByIdAndUpdate(ids, {
-            name:name,
-            description:description,
-            assignedTo,
-            assignedDate :assigned,
-            submittedDate,
-            imageString:image
-        }, { new: true });
+    
+    let updatingData={name:name,
+        description:description,
+        assignedTo:username,
+        assignedDate :assigned,
+        submittedDate,
+        imageString:image || undefined}
+
+        const asset = await Asset.findByIdAndUpdate(ids, updatingData, { new: true });
     
         
         if (!asset) {
-            return res.status(404).json({success:false, message: 'Asset not found' });
+            return res.status(404).json({success:false, message: 'Asset not found' ,data:[]});
         }
         return res.status(200).json({
             success:true,
@@ -158,7 +170,7 @@ const updateById = async (req, res,next) => {
 
 const deleteMultiple =async (req,res)=>{
     try{
-        const ids = req.body._id;
+        const ids = req.body._id || req.params.id;
       
         let result;
         if(!ids){
@@ -175,14 +187,16 @@ const deleteMultiple =async (req,res)=>{
             });
            
         }   
-        if(result. deletedCount>0){
-            return res.status(200).json({success:true,message: 'Asset deleted',data:[]});
-        }
-        else{
-            return res.status(500).json({success:false,message: 'Asset not found',data:[]});
-        }
-        }
+        // if(result.deletedCount>0){
+        //     return res.status(200).json({success:true,message: 'Asset deleted',data:[]});
+        // }
+        // else{
+        //     return res.status(500).json({success:false,message: 'Asset not found',data:[]});
+        // }
+        return res.status(200).json({success:true,message: 'Asset deleted',data:[]});
 
+        }
+            
         catch(error){
             console.log(error);
             
